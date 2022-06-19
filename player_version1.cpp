@@ -55,7 +55,7 @@ class Board{
         std::array<std::array<int, SIZE>, SIZE> table;
         int step = 0;//現在第幾步
         //int depth = 0;//搜索層數
-        int type[8] = {0};
+        int chesstype[3][8] = {0};
         Point best;
         int minimax(int role, int depth);
         Point search();
@@ -174,6 +174,11 @@ int Board::evaluate(){
             }
         }
     }
+    if(chesstype[player][flex3] && chesstype[player][flex4]){
+        value += 600;
+    }else if(chesstype[enemy][flex3] && chesstype[enemy][flex4]){
+        value -= 800;
+    }
     return value;
 }
 
@@ -205,15 +210,17 @@ int Board::CheckXY(int x, int y){
 
 int Board:: Checktype(int x, int y, int role){
     int type = 0;
+    int c = 0;
     if(Check5(x,y,role)){
-        type = win;    
-    }else if(Check4(x, y, role) == flex4){
-        type = flex4;
-    }else if(Check3(x,y,role)){
-        type = flex3;
+        type = win;   
+    }else if(c = Check4(x, y, role)){
+        type = c;
+    }else if(c = Check3(x,y,role)){
+        type = c;
     }else if(Check2(x,y,role)){
         type = flex2;
     }
+    chesstype[role][type]++; 
     return type;
 }
 
@@ -263,9 +270,9 @@ int Board::Check3(int x, int y, int role){
         }
         if(cnt == 5){
             if(!econt)
-                return flex4;
+                return flex3;
             else if(econt < 2)
-                return block4;
+                return block3;
         }            
     }    
     return false;
