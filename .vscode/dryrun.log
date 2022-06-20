@@ -1,7 +1,6 @@
 make.exe --dry-run --always-make --keep-going --print-directory
 make.exe: Entering directory 'c:/Users/TimChuo/Desktop/MiniProject3/student/src'
 g++ -Wall -Wextra --std=c++14 -o main.exe main.cpp
- 
-g++ -Wall -Wextra --std=c++14 -o player_random.exe player_random.cpp
+g++ -Wall -Wextra --std=c++14 -o player_version1.exe player_version1.cpp
 make.exe: Leaving directory 'c:/Users/TimChuo/Desktop/MiniProject3/student/src'
  

@@ -16,10 +16,10 @@ enum SPOT_STATE {
     OUTSIDE = 3
 };
 
-struct Pos //位置座標
+struct Cell //位置座標
 {
-	int x;
-	int y;
+	//Point p;
+    int can;
 };
 
 struct Point //點
@@ -29,7 +29,7 @@ struct Point //點
 	int val;
 };
 
-const int Maxdepth = 1;
+const int Maxdepth = 2;
 
 const int dx[4]={1,0,1,1};
 const int dy[4]={0,1,1,-1};
@@ -46,20 +46,26 @@ int player,enemy;
 const int SIZE = 15;
 std::array<std::array<int, SIZE>, SIZE> board;
 
-const int eval[8] = { 0, 2, 10, 16, 90, 140, 1000, 1500 };
+const int eval[8] = { 0, 2, 12, 18, 96, 144, 800, 1200 };
 class Board{
     public:
         Board();
         ~Board();
         Board(const std::array<std::array<int, SIZE>, SIZE> &rhs);
         std::array<std::array<int, SIZE>, SIZE> table;
+        Cell cell[16][16];
         int step = 0;//現在第幾步
-        //int depth = 0;//搜索層數
+        int alpha = INT_MIN,beta = INT_MAX;
         int chesstype[3][8] = {0};
+        int _win[3] = {0};
+        int double3[3] = {0};
         Point best;
-        int minimax(int role, int depth);
+        Point minimax(int role, int depth);
         Point search();
+        void init();
+        void outchess();
         int evaluate();
+        
         int CheckXY(int x,int y);
         int Checktype(int x, int y, int role);
         int Check2(int x, int y, int role);
@@ -74,6 +80,19 @@ class Board{
 
 Board::Board(const std::array<std::array<int, SIZE>, SIZE> &rhs){
     table = rhs;
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            table[i][j] = rhs[i][j];
+            if(board[i][j] == BLACK || board[i][j] == WHITE){                
+                for(int a = -1; a <= 1;a++){
+                    for(int b = -1;b <= 1;b++){
+                        if(!CheckXY(i+a,j+b)|| (a==0 && b == 0)) continue;
+                        cell[i+a][j+b].can++;
+                    }
+                }
+            }
+        }
+    }
 }
 Board::~Board(){
 
@@ -103,6 +122,7 @@ void write_valid_spot(std::ofstream& fout) {
         // Pos best = root.minimax(player,0);
         int x = (rand() % SIZE);
         int y = (rand() % SIZE);
+        // cout << step <<endl;
         if(step == 0){
             x = y = 7;
         }
@@ -127,36 +147,100 @@ void write_valid_spot(std::ofstream& fout) {
             y = ry; 
         }
         else{
-            bestmove = root.search();
+            bestmove = root.minimax(player,0);
+            // bestmove = root.search();
             x = bestmove.x;
             y = bestmove.y;
             // cout << x << "," << y << endl;
             // cout << bestmove.val << endl;
+            // root.outchess();
         }
         if (board[x][y] == EMPTY) {
+            // cout << x << "," << y << endl;
             fout << x << " " << y << std::endl;
             // Remember to flush the output to ensure the last action is written to file.
             fout.flush();
         }
     }
 }
+void Board::outchess(){
+    cout << "Player:";
+    for(int i = 1;i <= win;i++){
+        cout  << chesstype[player][i] << ",";
+    }
+    cout << endl;
+    cout << "Enemy:";
+    for(int i = 1;i <= win;i++){
+        cout  << chesstype[enemy][i] << ",";
+    }
+    cout << endl;
+}
 
-int Board::minimax(int role,int depth){
-    int value;
+Point Board::minimax(int role,int depth){
+    Point ans;
+    int st = 0;
+    if(step <= 20)
+        st = 3;
+    else
+        st = 0;
+    
     if(depth == Maxdepth){
-        
+        // cout << "in" << endl;
+        Board a = board;
+        best = a.search();       
+        return best;
     }
     else if(role == player){ //Maximize
-        value = INT_MIN;
-        for(int i = 0;i < SIZE;i++){
-
+        best.val = INT_MIN;
+        for(int i = st;i < SIZE - st;i++){
+            for(int j = st;j < SIZE - st;j++){
+                if(table[i][j] == EMPTY){
+                    if(!cell[i][j].can)continue;
+                    Board a = board;
+                    a.table[i][j] = player;
+                    Point tmp = a.minimax(enemy,depth+1);
+                    if(tmp.val > best.val){
+                        best.x = tmp.x;
+                        best.y = tmp.y;
+                        best.val = tmp.val;
+                    }
+                    alpha = max(best.val,alpha);
+                    if(alpha >= beta){
+                        //fout << best.x << " " << best.y << endl;
+                        return best;
+                    }
+                    // table[i][j] = EMPTY;
+                    // cout << best.x << "," << best.y << "value:" << best.val <<endl;
+                }
+            }
+            // cout << "\n";
         }
+        return best;
     }
     else if(role == enemy){ //Minimize
-        value = INT_MAX;
-    }
-
-    return value;
+        best.val = INT_MAX;
+        for(int i = st;i < SIZE - st;i++){
+            for(int j = st;j < SIZE - st;j++){
+                if(table[i][j] == EMPTY){
+                    if(!cell[i][j].can)continue;
+                    Board a = board;
+                    a.table[i][j] = enemy;
+                    Point tmp = a.minimax(player,depth+1);
+                    if(tmp.val < best.val){
+                        best.x = tmp.x;
+                        best.y = tmp.y;
+                        best.val = tmp.val;
+                    }
+                    beta = min(best.val,beta);
+                    // table[i][j] = EMPTY;
+                    if(alpha >= beta)
+                        return best;
+                }
+            }
+            
+        }       
+        return best;
+    }   
 }
 
 int Board::evaluate(){
@@ -174,28 +258,48 @@ int Board::evaluate(){
             }
         }
     }
+    if(_win[player]) value += 12000;
+    if(_win[enemy]) {
+        value -= 10000;
+        // cout<<"Enemy wining!\n";
+    }
+    if(double3[player] >= 2)
+        value += 8000;
+    if(double3[enemy] >= 2){
+        // cout << "DOUBLE3\n";
+        value -= 7000;
+    }
+    // outchess();
+    /*
     if(chesstype[player][flex3] && chesstype[player][flex4]){
         value += 600;
     }else if(chesstype[enemy][flex3] && chesstype[enemy][flex4]){
         value -= 800;
     }
+    if(chesstype[enemy][flex4] || chesstype[enemy][block4]){
+        value -= 1000;
+    }
+    */
     return value;
 }
 
 Point Board::search(){
     int val;
-    best.val = -1000;
+    best.val = INT_MIN;
     for(int i = 0;i < SIZE;i++){
         for(int j = 0;j < SIZE;j++){
             if(table[i][j] == EMPTY){
-                table[i][j] = player;
-                val = evaluate();
+                Board a = board;
+                a.table[i][j] = player;
+                val = a.evaluate();
                 if(val >= best.val){
                     best.x = i;
                     best.y = j;
                     best.val = val;
                 }
-                table[i][j] = EMPTY;
+                if(best.val >= 12000)
+                    return best;
+                // table[i][j] = EMPTY;
             }
         }
     }
@@ -211,16 +315,17 @@ int Board::CheckXY(int x, int y){
 int Board:: Checktype(int x, int y, int role){
     int type = 0;
     int c = 0;
+    
     if(Check5(x,y,role)){
         type = win;   
-    }else if(c = Check4(x, y, role)){
-        type = c;
-    }else if(c = Check3(x,y,role)){
-        type = c;
+    }else if(Check4(x, y, role)){
+        type = flex4;
+    }else if(Check3(x,y,role)){
+        type = flex3;
     }else if(Check2(x,y,role)){
         type = flex2;
     }
-    chesstype[role][type]++; 
+    // this->chesstype[role][type]++; 
     return type;
 }
 
@@ -243,7 +348,7 @@ int Board::Check2(int x, int y, int role){
             }
         }
         if(cnt == 4)
-            return true;
+            return flex2;
     }
     return false;
 }
@@ -263,16 +368,11 @@ int Board::Check3(int x, int y, int role){
                 cnt++;
             }else if(table[tx][ty] == EMPTY && (j < 1 || j > 3)){
                 cnt++;
-            }else if(table[tx][ty] == (3-role) && (j < 1 || j > 3)){
-                econt++;
-                cnt++;
             }
         }
         if(cnt == 5){
-            if(!econt)
-                return flex3;
-            else if(econt < 2)
-                return block3;
+            double3[role]++;
+            return flex3;
         }            
     }    
     return false;
@@ -300,9 +400,13 @@ int Board::Check4(int x, int y, int role){
             }
         }
         if(cnt == 6){
-            if(!econt)
+            if(!econt){
+                //cout << "flex4\n";
+                _win[role] = true;
                 return flex4;
+            }
             else if(econt < 2)
+                //cout << "block4\n";
                 return block4;      
         }
     }    
@@ -324,8 +428,11 @@ int Board::Check5(int x, int y, int role){
             if(table[tx][ty] == role)
                 cnt++;            
         }
-        if(cnt == 5)
-            return true;                    
+        if(cnt == 5){
+            //cout << "win"<<endl;
+            _win[role] = true;
+            return true;
+        }                    
     }    
     return false;
 }
