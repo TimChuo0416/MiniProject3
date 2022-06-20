@@ -46,7 +46,7 @@ int player,enemy;
 const int SIZE = 15;
 std::array<std::array<int, SIZE>, SIZE> board;
 
-const int eval[8] = { 0, 2, 12, 18, 96, 144, 800, 1200 };
+const int eval[8] = { 0, 2, 12, 18, 96, 85, 800, 1500 };
 class Board{
     public:
         Board();

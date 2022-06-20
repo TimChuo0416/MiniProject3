@@ -6,7 +6,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Jun 20 09:46:30 2022
+# Make data base, printed on Mon Jun 20 21:04:25 2022
 
 # Variables
 
@@ -48,7 +48,8 @@ PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 MAKEFILE_LIST :=  makefile
 # environment
 TMP = C:\Windows\TEMP
-# makefile (from 'makefile', line 3)
+# makefile (from 'makefil 
+e', line 3)
 SOURCES = $(wildcard *.cpp)
 # makefile (from 'makefile', line 2)
 CXXFLAGS = --std=c++14
@@ -59,14 +60,13 @@ PROGRAMW6432 = C:\Program Files
 # environment
 PROGRAMDATA = C:\ProgramData
 # environment
-VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-66be6f06-6f28-4bd0-b066-fc00bbd50f0d-sock
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-ca0c26bb-11bf-46b3-8f92-2f788992728a-sock
 # environment
 VSCODE_CWD = C:\Users\TimChuo\AppData\Local\Programs\Microsoft VS Code
 # default
 MAKE_HOST := x86_64-w64-mingw32
 # environment
-PATH = C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\dotnet\;C:\Program Files\Git\cmd;C:\Users\TimChuo\Desktop\logic design\ctag;C:\iverilog\bin;C:\iverilog\gtkwave\bin;C:\Program Files\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\mingw64\bin;C:\Users\TimChuo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\TimChuo\AppData\Local\Microsoft 
-\WindowsApps;C:\Users\�����^\AppData\Local\Programs\Microsoft VS Code\bin;%U;ERPROFILE%\.dotnet\tools;C:\Users\TimChuo\Desktop\logic design\ctag;C:\iverilog\bin;C:\iverilog\gtkwave\bin;
+PATH = C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\dotnet\;C:\Program Files\Git\cmd;C:\Users\TimChuo\Desktop\logic design\ctag;C:\iverilog\bin;C:\iverilog\gtkwave\bin;C:\Program Files\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\mingw64\bin;C:\Users\TimChuo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\TimChuo\AppData\Local\Microsoft\WindowsApps;C:\Users\�����^\AppData\Local\Programs\Microsoft VS Code\bin;%U;ERPROFILE%\.dotnet\tools;C:\Users\TimChuo\Desktop\logic design\ctag;C:\iverilog\bin;C:\iverilog\gtkwave\bin;
 # environment
 COMMONPROGRAMW6432 = C:\Program Files\Common Files
 # environment
@@ -88,7 +88,7 @@ ELECTRON_RUN_AS_NODE = 1
 # automatic
 %F = $(notdir $%)
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_19740_KZPISTGZKCZCTVOD
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_22816_YETEIANUQROETTGK
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
@@ -204,7 +204,7 @@ LANG = C
 # environment
 PROCESSOR_LEVEL = 6
 # environment
-VSCODE_PID = 19740
+VSCODE_PID = 22816
 # environment
 USERDOMAIN_ROAMINGPROFILE = MSI
 # variable set hash-table stats:
@@ -216,9 +216,9 @@ USERDOMAIN_ROAMINGPROFILE = MSI
 
 # Directories
 
-# . (key c:/Users/TimChuo/Desktop/MiniProject3/student/src, mtime 1655671330): 14 files, no impossibilities.
+# . (key c:/Users/TimChuo/Desktop/MiniProject3/student/src, mtime 1655730226): 16 files, no impossibilities.
 
-# 14 files, no impossibilities in 1 directories.
+# 16 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -234,7 +234,7 @@ player_version1.exe: player_version1.cpp
 #  recipe to execute (from 'makefile', line 17):
 	$(CXX) -Wall -Wextra $(CXXFLAGS) -o $@ $<
 
-all: main.exe player_version1.exe
+all: main.exe player_version1.exe player_random.exe
 #  Phony target (prerequisite of .PHONY).
 #  Command line target.
 #  Implicit rule search has not been done.
@@ -292,7 +292,7 @@ makefile:
 # Not a target:
 main.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-20 01:38:53
+#  Last modified 2022-06-20 17:31:01
 #  File has been updated.
 #  Successfully updated.
 
@@ -310,20 +310,34 @@ clean:
 #  recipe to execute (from 'makefile', line 25):
 	del /f $(EXE) $(OTHER)
 
+player_random.exe: player_random.cpp
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: 'player_random'
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 17):
+	$(CXX) -Wall -Wextra $(CXXFLAGS) -o $@ $<
+
+# Not a target:
+player_random.cpp:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
 # files hash-table stats:
-# Load=10/1024=1%, Rehash=0, Collisions=0/30=0%
+# Load=12/1024=1%, Rehash=0, Collisions=0/35=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 23 / storage = 210 B / avg = 9 B
-# current buf: size = 8162 B / used = 210 B / count = 23 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 25 / storage = 246 B / avg = 9 B
+# current buf: size = 8162 B / used = 246 B / count = 25 / avg = 9 B
 
-# strcache performance: lookups = 40 / hit rate = 42%
+# strcache performance: lookups = 47 / hit rate = 46%
 # hash-table stats:
-# Load=23/8192=0%, Rehash=0, Collisions=1/40=3%
-# Finished Make data base on Mon Jun 20 09:46:30 2022
+# Load=25/8192=0%, Rehash=0, Collisions=1/47=2%
+# Finished Make data base on Mon Jun 20 21:04:25 2022
 
  
