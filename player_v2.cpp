@@ -64,17 +64,16 @@ class Board{
         int chesstype[3][8] = {0};
         int _win[3] = {0};
         int double3[3];
-        int enemy_wining,me_wining;
+        int enemy_wining,me_wining;//win immediately
+        int ewin,mwin;//win next step
         Point best;
         // Point minimax(int role, int depth);
         // int minimax(Board root,int role, int depth);
         Point search(int role);
         void init();
-        void outchess();
-        void win_prior(int x, int y);
+        void outchess();        
         int evaluate();
-        
-        
+
         int Checktype(int x, int y, int role);
         int Check2(int x, int y, int role);
         int Check3(int x, int y, int role);
@@ -85,7 +84,8 @@ class Board{
     private:
         
 };
-
+void find_win(Board& root);
+void find_lose(Board& root);
 int CheckXY(int x,int y);
 int mini_max(Board& now, int role,int depth,int alpha,int beta);
 void read_board(std::ifstream& fin) {
@@ -101,7 +101,6 @@ void read_board(std::ifstream& fin) {
 
 void write_valid_spot(std::ofstream& fout) {
     srand(time(NULL));
-    int x, y;
     int t = 0;
     // Keep updating the output until getting killed.
     while(runtime != t++) {
@@ -129,8 +128,8 @@ void write_valid_spot(std::ofstream& fout) {
                     }
                     if(board[i][j] == player && step == 2){
                         do{
-                            rx = i + rand() % (3) - step;
-                            ry = j + rand() % (3) - step;
+                            rx = i + rand() % (3) - 1;
+                            ry = j + rand() % (3) - 1;
                         } while(board[rx][ry] != EMPTY);
                         break;
                     }
@@ -140,7 +139,27 @@ void write_valid_spot(std::ofstream& fout) {
             y = ry; 
         }
         else{
+            
+            find_win(root);
+            if(CheckXY(root.best.x,root.best.y)){
+                x = root.best.x;
+                y = root.best.y;
+                fout << x << " " << y << std::endl;
+                // Remember to flush the output to ensure the last action is written to file.
+                fout.flush();
+                return;
+            }
+            find_lose(root);
+            if(CheckXY(root.best.x,root.best.y)){
+                x = root.best.x;
+                y = root.best.y;
+                fout << x << " " << y << std::endl;
+                // Remember to flush the output to ensure the last action is written to file.
+                fout.flush();
+                return;
+            }
             start = clock();
+
             int max_value = mini_max(root,player,0,INT_MIN,INT_MAX);
             x = root.best.x;
             y = root.best.y;
@@ -150,26 +169,28 @@ void write_valid_spot(std::ofstream& fout) {
             // x = bestmove.x;
             // y = bestmove.y;
             // 
+            /*
             cout <<"(" << x << "," << y << ")" <<endl;
             cout << "val <" << root.best.val<<","<< max_value << ">" << endl;
-            
+            */
             // root.outchess();
         }
-        if(board[x][y] == EMPTY){
+        
             // cout << x << "," << y << endl;
-            if(!CheckXY(x,y)){
-                do{
-                    x = (rand() % SIZE);
-                    y = (rand() % SIZE);
-                }while(board[x][y] != EMPTY);
-            }
-            fout << x << " " << y << std::endl;
-            // Remember to flush the output to ensure the last action is written to file.
-            fout.flush();
+        if(!CheckXY(x,y)){
+            do{
+                x = (rand() % SIZE);
+                y = (rand() % SIZE);
+            }while(board[x][y] != EMPTY);
         }
+        fout << x << " " << y << std::endl;
+            // Remember to flush the output to ensure the last action is written to file.
+        fout.flush();
+        
         
     }
 }
+
 //Board::Board():table(){}
 Board::Board(const std::array<std::array<int, SIZE>, SIZE> &rhs){
     init();
@@ -194,10 +215,14 @@ Board::~Board(){
 }
 
 void Board::init(){
+    best.x = -1;
+    best.y = -1;
     v = 0;
     ev = 0;
     enemy_wining = 0;
     me_wining = 0;
+    mwin = 0;
+    ewin = 0;
     for(int i = 0;i < 3;i++){
         for(int j = 0;j < 8;j++){
             chesstype[i][j] = 0;
@@ -230,10 +255,40 @@ void Board::outchess(){
     print = 0;
 }
 
-void Board::win_prior(int x, int y){
-    
-    // table[x][y] = player;
-    
+
+void find_win(Board& root){
+    for(int i = 0;i < SIZE;i++){
+        for(int j = 0;j < SIZE;j++){
+            if(root.table[i][j] == EMPTY){
+                if(!root.cell[i][j].can)continue;
+                root.table[i][j] = player;
+                Board a(root.table);
+                if(a.me_wining){
+                    root.best.x = i;
+                    root.best.y = j;
+                    return;
+                }
+                root.table[i][j] = EMPTY;
+            }
+        }
+    }
+}
+void find_lose(Board& root){
+    for(int i = 0;i < SIZE;i++){
+        for(int j = 0;j < SIZE;j++){
+            if(root.table[i][j] == EMPTY){
+                if(!root.cell[i][j].can)continue;
+                root.table[i][j] = enemy;
+                Board a(root.table);
+                if(a.enemy_wining){
+                    root.best.x = i;
+                    root.best.y = j;
+                    return;
+                }
+                root.table[i][j] = EMPTY;
+            }
+        }
+    }
 }
 
 /*
@@ -310,10 +365,8 @@ Point Board::minimax(int role,int depth){
 int mini_max(Board& now ,int role,int depth ,int alpha, int beta){
     Point best;
     int st = 0;
-    if(step <= 10)
-        st = 2;
     
-   
+    
     if(depth == Maxdepth){
         // cout << "in" << endl;
         best = now.search(role);       
@@ -330,17 +383,19 @@ int mini_max(Board& now ,int role,int depth ,int alpha, int beta){
                     now.table[i][j] = EMPTY;
                     if((a.v - a.ev) <= (now.v-now.ev))continue;
                     
-                    if(a.me_wining){
+                    if(a.mwin){
                         now.best.x = i;
                         now.best.y = j;
                         return 1;
                     }
-                    
+                
                     int tmp = mini_max(a,enemy,depth+1,alpha,beta);
                     //a.outchess();
-                    if(tmp <= -20000){
+                    if(tmp == -19880){
                         //if it is bad solution
-                        continue;
+                        now.best.x = a.best.x;
+                        now.best.y = a.best.y;
+                        return;
                     }
                     if(tmp > best.val){
                         best.x = i;
@@ -355,7 +410,7 @@ int mini_max(Board& now ,int role,int depth ,int alpha, int beta){
                         now.best.y = best.y;
                         return best.val;
                     }
-                    if((clock() - start) / CLOCKS_PER_SEC >= 9){
+                    if((clock() - start) / CLOCKS_PER_SEC > 9){
                         //copy the value and xy
                         now.best.val = best.val;
                         now.best.x = best.x;
@@ -382,8 +437,11 @@ int mini_max(Board& now ,int role,int depth ,int alpha, int beta){
                     Board a(now.table);
                     now.table[i][j] = EMPTY;
                     if((a.v - a.ev) > (now.v-now.ev))continue;
-                    if(a.enemy_wining){
-                        return -20000;
+                    
+                    if(a.ewin){
+                        now.best.x = i;
+                        now.best.y = j;
+                        return -19880;
                     }
                     
                     int tmp = mini_max(a,player,depth+1,alpha,beta);
@@ -435,7 +493,7 @@ int Board::evaluate(){
         value += eval[i]*chesstype[player][i];
     }
     for(int i = 1;i < 8;i++){
-        ev += eval[i]*chesstype[enemy][i];
+        ev += eval[i]*chesstype[enemy][i]*1.1;
     }
     if(chesstype[player][win]) {
         value += 20000;
@@ -445,9 +503,12 @@ int Board::evaluate(){
         ev += 20000;
         enemy_wining = 1;  
     }
-    if(chesstype[player][flex4]) value += 2000;
-    if(chesstype[enemy][flex4]) {
-        ev += 4000;
+    if(chesstype[player][flex4]) {
+        value += 3000;
+        mwin = 1;
+    }if(chesstype[enemy][flex4]) {
+        ev += 5000;
+        ewin = 1;
         // enemy_wining = 1;
         // cout<<"Enemy wining!\n";
     }
@@ -466,7 +527,7 @@ int Board::evaluate(){
         ev += 1200;
     }
     else if(double3[enemy] && chesstype[enemy][block4])
-        ev += 2000;    
+        ev += 2400;    
     // outchess();
     /*
     if(chesstype[player][flex3] && chesstype[player][flex4]){
@@ -541,9 +602,10 @@ int Board:: Checktype(int x, int y, int role){
 }
 
 int Board::Check2(int x, int y, int role){
-    int cnt,flag = 0;
+    int cnt,flag = 0,ecnt;
     for(int i = 0; i < 4;i++){
         cnt = 0;
+        ecnt = 0;
         int a = x - 2 * dx[i];
         int b = y - 2 * dy[i];
         if(!CheckXY(a,b)) continue;
@@ -556,13 +618,17 @@ int Board::Check2(int x, int y, int role){
                 cnt++;
             }else if(table[tx][ty] == EMPTY && (j == 0|| j == 3)){
                 cnt++;
-            }else{
+            }else if(table[tx][ty] == (3-role) && (j == 0|| j == 3)){
+                cnt++;
+                ecnt++;
                 break;
             }
         }
-        if(cnt == 4){
+        if(cnt == 4 && !ecnt){
             chesstype[role][flex2]++;
             flag = 1;
+        }else if(cnt == 4 && (ecnt == 1)){
+            chesstype[role][block2]++;
         }
     }
     return flag;
